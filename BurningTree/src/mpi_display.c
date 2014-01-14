@@ -1,17 +1,19 @@
-#include "mpi_display.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-static int frame_counter = 0;
+#include "mpi_project.h"
+#include "mpi_display.h"
 
 void display_finalize(struct ctx_s *ctx)
 {
+	++ ctx->timeStepCount;
 }
 
 void display_init(struct ctx_s *ctx, const char* filename, int domainX, int domainY )
 {
 	ctx->timeStepCount = 0;
+	ctx->subDomainCount = 0;
 	ctx->domainX = domainX;
 	ctx->domainY = domainY;
 	strncpy(ctx->filename,255,filename);
@@ -31,6 +33,10 @@ void display_init(struct ctx_s *ctx, const char* filename, int domainX, int doma
 
 void display_render_step(struct ctx_s *ctx, int *grid,int debutX, int debutY, int tailleX, int tailleY, int temps)
 {
-	++ ctx->timeStepCount;
+	if( temps != ctx->lastTimeStep )
+	{
+		++ ctx->timeStepCount;
+		++ ctx->subDomainCount;
+	}
 
 }
