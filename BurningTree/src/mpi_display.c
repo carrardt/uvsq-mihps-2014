@@ -1,42 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "mpi_project.h"
 #include "mpi_display.h"
 
 void display_finalize(struct ctx_s *ctx)
 {
-	++ ctx->timeStepCount;
+	++ ctx->timeStep;
 }
 
-void display_init(struct ctx_s *ctx, const char* filename, int domainX, int domainY )
+void display_init(struct ctx_s *ctx, const char* filename, int domainX, int domainY, int domainZ )
 {
-	ctx->timeStepCount = 0;
-	ctx->subDomainCount = 0;
+	ctx->timeStep = 0;
+	ctx->domainCount = 0;
 	ctx->domainX = domainX;
 	ctx->domainY = domainY;
-	strncpy(ctx->filename,255,filename);
-	ctx->colorMap[0+0] = 128;
-	ctx->colorMap[0+1] = 128;
-	ctx->colorMap[0+2] = 128;
-	ctx->colorMap[1+0] = 0;
-	ctx->colorMap[1+1] = 255;
-	ctx->colorMap[1+2] = 0;
-	ctx->colorMap[2+0] = 255;
-	ctx->colorMap[2+1] = 0;
-	ctx->colorMap[2+2] = 0;
-	ctx->colorMap[3+0] = 0;
-	ctx->colorMap[3+1] = 0;
-	ctx->colorMap[3+2] = 0;
+	ctx->domainZ = domainZ;
+	strncpy(ctx->filename,filename,255);
 }
 
-void display_render_step(struct ctx_s *ctx, int *grid,int debutX, int debutY, int tailleX, int tailleY, int temps)
+void display_render_step(struct ctx_s *ctx, int *grid,int startX, int startY, int startZ, int sizeX, int sizeY, int sizeZ, int timeStep)
 {
-	if( temps != ctx->lastTimeStep )
+	char fileName[256];
+
+	if( timeStep > ctx->timeStep )
 	{
-		++ ctx->timeStepCount;
-		++ ctx->subDomainCount;
+		ctx->timeStep = timeStep;
+		ctx->domainCount = 0;
 	}
 
+	snprintf(fileName,255,"%s_Time%04d_Domain%04d.raw",ctx->filename,timeStep,ctx->domainCount);
+	FILE* fp = fopen(fileName,"wb");
+	if(fp==0)
+	{
+		fprintf(stderr,"Impossible d'ouvrir le fichier %s",fileName);
+		return;
+	}
+
+	if( sizeZ==0 ) sizeZ = 1;
+	fwrite(grid,sizeX*sizeY*sizeZ*sizeof(int),1,fp);
+	fclose(fp);
+
+	++ ctx->domainCount;
 }
+

@@ -149,7 +149,8 @@ int * recopy_grid(struct ctx_s* ctx, int **grid) {
 /*-----------------------------------------------------------
  *  Fonction MPI: initialization du MPI
  *----------------------------------------------------------*/
-void initalize_mpi(int argc, char** argv, struct ctx_s *ctx) {
+void initalize_mpi(int argc, char** argv, struct ctx_s *ctx)
+{
   /* A completer en MPI */
   ctx->rank = 0;
   ctx->size = 1;
@@ -159,7 +160,8 @@ void initalize_mpi(int argc, char** argv, struct ctx_s *ctx) {
 /*-----------------------------------------------------------
  *  Fonction MPI: echange des cellules fantomes
  *----------------------------------------------------------*/
-void exchange_ghost_cells(struct ctx_s *ctx) {
+void exchange_ghost_cells(struct ctx_s *ctx)
+{
   /* A completer en MPI */
  }
 
@@ -167,7 +169,8 @@ void exchange_ghost_cells(struct ctx_s *ctx) {
 /*-----------------------------------------------------------
  *  Fonction MPI: terminaise du MPI
  *----------------------------------------------------------*/
-void finalize_mpi(struct ctx_s *ctx) {
+void finalize_mpi(struct ctx_s *ctx)
+{
   /* A completer en MPI */
 }
 
@@ -176,9 +179,12 @@ void finalize_mpi(struct ctx_s *ctx) {
  * Fonction MPI: mise en forme de la grille et ecriture sur disque
  * de la sortie
  *----------------------------------------------------------*/
-void gather_grid(struct ctx_s * ctx, int * recopy) {
+void gather_grid(struct ctx_s * ctx, int * recopy)
+{
+  static int timeStep = 0;
+
   /* A completer en MPI */
-  display_render_step(ctx, recopy, GRIDSZ, GRIDSZ, RATIO);
+  display_render_step(ctx, recopy, /*départ du sous-domaine*/ 0,0,0, /*taille du sous-domaine*/ GRIDSZ,GRIDSZ,0, /*pas de temps*/ timeStep++ );
 
   free(recopy);
 }
@@ -187,7 +193,8 @@ void gather_grid(struct ctx_s * ctx, int * recopy) {
 /*-----------------------------------------------------------
  *  Fonction MPI: verification des conditions finales de la simulation.
  *----------------------------------------------------------*/
-int check_final_conditions (struct ctx_s * ctx, int nb_updated_cells) {
+int check_final_conditions (struct ctx_s * ctx, int nb_updated_cells)
+{
   /* A completer en MPI */
   return 0;
 }
@@ -216,8 +223,8 @@ int main (int argc, char **argv) {
   fprintf(stderr, "Starting task %d (%dx%d)\n", ctx.rank, ctx.X, ctx.Y);
 
   /* Initialisation affichage */
-  sprintf(output, "output_%d.gif", ctx.rank);
-  display_init(output, &ctx);
+  sprintf(output, "output/Rank%d", ctx.rank);
+  display_init(&ctx, output, GRIDSZ,GRIDSZ,0 ); // taille 0 pour la 3ieme dimension signifie une grille 2D
 
   /* Mettre la case au milieu du sous-domaine de la tache 0 en feu ! */
   if (ctx.rank == 0) {

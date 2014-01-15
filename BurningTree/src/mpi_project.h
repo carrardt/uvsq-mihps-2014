@@ -25,11 +25,9 @@ struct ctx_s {
 
   /* Pour l'interface d'affichage.
    * Ne doit pas être modifié ! */
-  unsigned char colorMap[4*3]; // les couleurs associées à l'état des cellules
-  int timeStepCount;
-  int subDomainCount;
-  int domainX, domainY;
-  FILE* file;
+  int timeStep;
+  int domainCount;
+  int domainX, domainY, domainZ;
   /* Nom du fichier de sortie */
   char filename[256];
 };
